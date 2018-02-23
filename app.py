@@ -43,28 +43,44 @@ def mirror(name):
 @app.route('/users')
 def users():
     if 'team' in request.args:
-        data = db.getByTeam('users', request.args.get('team'))
-        if data is None:
-            return create_response({})
+        data = []
+        users = db.get('users')
+        for user in users:
+            if(user['team'] == request.args.get('team')):
+                data.append(user)
         return create_response(data)
     else:
         return create_response(db.get('users'))
 
 @app.route('/users', methods=['POST'])
 def createUser():
-    if not 'name' in request.json or not 'age' in request.json or not 'team' in request.json:
+    if 'name' not in request.get_json() or 'age' not in request.get_json() or 'team' not in request.get_json():
         return create_response({}, 422, "Missing parameters in body. Must contain name, age, and team.")
     else:
-        data = db.create('users', request.json)
+        data = db.create('users', request.get_json())
         return create_response(data, 201)
 
 @app.route('/users/<user_id>')
 def users_id(user_id):
 	data = db.getById('users', int(user_id))
-
 	if data is None:
 		return create_response({}, 404, "There is no user with the specified ID")
 	return create_response(data)
+
+@app.route('/users/<id>', methods=['PUT'])
+def update_user(id):
+	data = db.updateById('users', int(id), request.get_json())
+	if data is None:
+		return create_response({}, 404, "There is no user with the specified ID")
+	return create_response(data)
+
+@app.route('/users/<id>', methods=['DELETE'])
+def delte_user(id):
+    data = db.getById('users', int(id))
+    if data is None:
+        return create_response({}, 404, "There is no user with the specified ID")
+    db.deleteById('users', int(id))
+    return create_response({}, 200, "The user has been deleted")
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
