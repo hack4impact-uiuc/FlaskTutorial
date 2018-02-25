@@ -38,6 +38,9 @@ def mirror(name):
     }
     return create_response(data)
 
+# USERS_ROUTE = '/users'
+# USERS_ID_ROUTE = '/users/<id>'
+
 @app.route('/users')
 def users():
     data = {
@@ -50,15 +53,56 @@ def user_by_id(id):
     data = {
         'user': db.getById('users', int(id))
     }
-    if int(id) > 0 and int(id) < 5:
-        return create_response(data)
-    else:
+    if db.getById('users', int(id)) is None:
         return create_response('404 Error. Check to make sure your id was between 1 and 4.')
+    else:
+        return create_response(data)
 
+#Added in the db.getByTeam command; see "mockdb_interface.py"
+@app.route('/users/teams')
+def team():
+    team = request.args['team']
+    data = {
+        'users': db.getByTeam('users', team)
+    }
+    return create_response(data)
 
+@app.route('/users', methods=['POST'])
+def add_user():
+    payload = request.get_json()
+    name = request.get_json().get('name')
+    age = request.get_json().get('age')
+    team = request.get_json().get('team')
 
+    if ((name is None) or (age is None) or (team is None)):
+        return create_response('422 Error: Check if you posted name, age, and team parameters.')
+    elif (type(age) is not int):
+        return create_response('Age should be an integer')
+    else:
+        return create_response(db.create('users', payload))
 
-# TODO: Implement the rest of the API here!
+@app.route('/users/<id>', methods=['PUT'])
+def update_user(id):
+    update_values = request.get_json()
+    name = request.get_json().get('name')
+    age = request.get_json().get('age')
+    team = request.get_json().get('team')
+
+    if db.getById('users', int(id)) is None:
+        return create_response('404 Error: The provided ID could not be found in the database')
+    elif ((name is None) or (age is None) or (team is None)):
+        return create_response('422 Error: Check if you posted name, age, and team parameters.')
+    else:
+        db.updateById('users', int(id), update_values)
+        return create_response("Successfully updated.")
+
+@app.route('/users/<id>', methods=['DELETE'])
+def delete_user(id):
+    if db.getById('users', int(id)) is None:
+        return create_response('404 Error: The provided ID could not be found in the database')
+    else:
+        db.deleteById('users', int(id))
+        return create_response('Successfully deleted.')
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
