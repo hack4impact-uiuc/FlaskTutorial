@@ -54,7 +54,7 @@ def user_by_id(id):
         'user': db.getById('users', int(id))
     }
     if db.getById('users', int(id)) is None:
-        return create_response('404 Error. Check to make sure your id was between 1 and 4.')
+        return create_response('404 Error. ID was not found in the database.')
     else:
         return create_response(data)
 
