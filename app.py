@@ -10,7 +10,6 @@ def create_response(data={}, status=200, message=''):
     Modifications included:
     - make success a boolean since there's only 2 values
     - make message a single string since we will only use one message per response
-
     IMPORTANT: data must be a dictionary where:
     - the key is the name of the type of data
     - the value is the data itself
@@ -39,6 +38,11 @@ def mirror(name):
     return create_response(data)
 
 # TODO: Implement the rest of the API here!
+
+@app.route('/users/')
+def get_users():
+    all_users = db.get('users')
+    return create_response(all_users)
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
