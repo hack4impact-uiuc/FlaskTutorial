@@ -39,10 +39,17 @@ def mirror(name):
 
 # TODO: Implement the rest of the API here!
 
+
 @app.route('/users/')
 def get_users():
     all_users = db.get('users')
-    return create_response(all_users)
+    team = request.args.get('team') #asking for teams from query params
+    team_users = []
+    for user in all_users:
+        if user['team'] == team:
+            team_users.append(user)
+    return create_response(team_users)
+
 
 @app.route('/users/<id>')
 def get_user_id(id):
