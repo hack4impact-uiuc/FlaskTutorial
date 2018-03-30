@@ -44,6 +44,16 @@ def get_users():
     all_users = db.get('users')
     return create_response(all_users)
 
+@app.route('/users/<id>')
+def get_user_id(id):
+    all_users = db.get('users')
+    intId = int(id)
+    if ((intId > 0) or (intId < len(all_users))):
+        user = all_users[intId - 1]
+        return create_response(user)
+    else:
+        return create_reponse({}, 404, "no such user")
+
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
 """
