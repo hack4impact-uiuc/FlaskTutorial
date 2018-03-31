@@ -69,8 +69,7 @@ def users():
             return create_response({}, 422, fail_message)
         return create_response(create_user, 201, 'You\'ve successfully crested a new user!')
 
-
-@app.route('/users/<id>', methods=['GET', 'POST'])
+@app.route('/users/<id>', methods=['GET', 'POST', 'DELETE'])
 def user_id(id):
     if request.method == 'GET':
         all_users = db.get('users')
@@ -86,6 +85,12 @@ def user_id(id):
             return create_response({}, 404, 'User not found.')
         else:
             return create_response(new_user, message='User id successfully updated')
+    elif request.method == 'DELETE':
+        if db.get('users') is None:
+            return create_response(status=400, message='User was not deleted')
+        else:
+            db.deleteById('users', int(id));
+            return create_response(message='User with id {} deleted'.format(id))
 
 
 
