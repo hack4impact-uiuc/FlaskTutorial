@@ -42,13 +42,16 @@ def mirror(name):
 @app.route('/users', methods=['GET', 'POST'])
 def users():
     if request.method=='GET':
-        all_users = db.get('users')
-        team = request.args.get('team') #asking for teams from query params
-        team_users = []
-        for user in all_users:
-            if user['team'] == team:
-                team_users.append(user)
-        return create_response(team_users)
+        if 'team' in request.args:
+            all_users = db.get('users')
+            team = request.args.get('team') #asking for teams from query params
+            team_users = []
+            for user in all_users:
+                if user['team'] == team:
+                    team_users.append(user)
+            return create_response(team_users)
+        else: 
+            return create_response(db.get('users'))
     elif request.method=='POST':
         json_input = request.get_json()
         name = json_input.get('name')
@@ -66,31 +69,55 @@ def users():
             return create_response({}, 422, fail_message)
         return create_response(create_user, 201, 'You\'ve successfully crested a new user!')
 
-# args = request.get_json()
-#     fields = ['name', 'age', 'team']
-#     user_info = [args.get(field) for field in fields]
-#     if None in user_info:
-#         message = 'Missing parameters ' + str([field for field in fields if args.get(field) == None])
-#         return create_response(args, 422, message) 
-#     else:
-#         return create_response(db.create('users', args), 201, 'Successfully added user!')
- 
-##STEPS
-#1. get json from request body
-#2. check if name, age, and team exist in json
-#3. if not, create_response with 422 status code with message
-#4. if yes, create_response with given data and 201 status code
 
-
-@app.route('/users/<id>', methods=['GET'])
+@app.route('/users/<id>', methods=['GET', 'POST'])
 def user_id(id):
-    all_users = db.get('users')
-    intId = int(id)
-    if ((intId > 0) or (intId < len(all_users))):
-        user = all_users[intId - 1]
-        return create_response(user)
-    else:
-        return create_reponse({}, 404, "no such user")
+    if request.method == 'GET':
+        all_users = db.get('users')
+        intId = int(id)
+        if ((intId > 0) or (intId < len(all_users))):
+            user = all_users[intId - 1]
+            return create_response(user)
+        else:
+            return create_reponse({}, 404, "no such user")
+    elif request.method == 'POST':
+        new_user = db.updateById('users', int(id), request.get_json()) #user_data = request.get_json()
+        if new_user is None:
+            return create_response({}, 404, 'User not found.')
+        else:
+            return create_response(new_user, message='User id successfully updated')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
