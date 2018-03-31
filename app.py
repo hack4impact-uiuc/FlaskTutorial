@@ -39,20 +39,51 @@ def mirror(name):
 
 # TODO: Implement the rest of the API here!
 
+@app.route('/users', methods=['GET', 'POST'])
+def users():
+    if request.method=='GET':
+        all_users = db.get('users')
+        team = request.args.get('team') #asking for teams from query params
+        team_users = []
+        for user in all_users:
+            if user['team'] == team:
+                team_users.append(user)
+        return create_response(team_users)
+    elif request.method=='POST':
+        json_input = request.get_json()
+        name = json_input.get('name')
+        age = json_input.get('age')
+        team = json_input.get('team')
+        try:
+            new_user_data = {
+                'name': name,
+                'age': age,
+                'team': team
+            }
+            create_user = db.create('users', new_user_data)
+        except KeyError:
+            fail_message = 'You are missing on or more of the body params required to create a new user. Please specify name, age, and team.'
+            return create_response({}, 422, fail_message)
+        return create_response(create_user, 201, 'You\'ve successfully crested a new user!')
 
-@app.route('/users/')
-def get_users():
-    all_users = db.get('users')
-    team = request.args.get('team') #asking for teams from query params
-    team_users = []
-    for user in all_users:
-        if user['team'] == team:
-            team_users.append(user)
-    return create_response(team_users)
+# args = request.get_json()
+#     fields = ['name', 'age', 'team']
+#     user_info = [args.get(field) for field in fields]
+#     if None in user_info:
+#         message = 'Missing parameters ' + str([field for field in fields if args.get(field) == None])
+#         return create_response(args, 422, message) 
+#     else:
+#         return create_response(db.create('users', args), 201, 'Successfully added user!')
+ 
+##STEPS
+#1. get json from request body
+#2. check if name, age, and team exist in json
+#3. if not, create_response with 422 status code with message
+#4. if yes, create_response with given data and 201 status code
 
 
-@app.route('/users/<id>')
-def get_user_id(id):
+@app.route('/users/<id>', methods=['GET'])
+def user_id(id):
     all_users = db.get('users')
     intId = int(id)
     if ((intId > 0) or (intId < len(all_users))):
